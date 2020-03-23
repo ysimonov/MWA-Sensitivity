@@ -123,7 +123,7 @@ if __name__ == "__main__":
 
     pfactor = 4.0 * np.real(z_lna) / CONST.ZF
     p_lna_prime = pfactor * int_p_lna
-    area_realised = 0.5 * pfactor * np.square(CONST.C0 / freq_array) * ffout2 #
+    area_realised = pfactor * np.square(CONST.C0 / freq_array) * ffout2 #0.5 *
     ant_temp = pfactor * scaling_factor * int_t_ext
     eff_rad = np.real(p_lna_prime / tau)
     sys_temp = ant_temp + np.real(tau) * (rcv_temp  + CONST.T0 * (1.0 - eff_rad))
