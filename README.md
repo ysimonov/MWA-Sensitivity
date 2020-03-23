@@ -34,3 +34,7 @@ OMP_THREAD_NUM=4 python3 MWA_sensitivity.py
 OR
 
 python3 MWA_sensitivity.py
+
+Required modules:
+
+time, datetime, numpy, pandas, scipy, matplotlib, h5py, skrf, astropy.io, decimal
