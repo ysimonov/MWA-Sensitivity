@@ -20,6 +20,14 @@ sin(el)=sin(ϕ)sin(θ)
 
 tan(az)=cos(ϕ)tan(θ)
 
+cos(θ)=cos(el)cos(az)
+
+tan(ϕ)=tan(el)/sin(az)
+
+tan(ϕ)=u/v
+
+sin(θ)=sqrt(u^2+v^2)
+
 4. Give the date of observation and local coordinates of the observer.
 
 Run: 
