@@ -136,14 +136,16 @@ def LegendreP(theta, N_max, source_theta=None):
 
     #Consider special case for m=1 at theta=0:
     m = 1
-    for n in range(1, LL+1):
-        summ = Decimal(0)
-        for k in range(0, math.ceil(n/2)):
-            summ += Decimal(-1) ** Decimal(k) * \
-                    (pochs(n-k+1, n-k) / fact(k) / fact(n-2*k-1)) * Decimal(1)**Decimal(n-2*k-1)
-                 
-        Leg_sin[idx[n, m],0] = -float(summ/Decimal(2) ** Decimal(n)*(Decimal(2*n+1)/Decimal(2)/ \
-                               pochs(n+1-m, 2*m)) ** Decimal(0.5))
+#    for n in range(1, LL+1):
+#        summ = Decimal(0)
+#        for k in range(0, math.ceil(n/2)):
+#            summ += Decimal(-1) ** Decimal(k) * \
+#                    (pochs(n-k+1, n-k) / fact(k) / fact(n-2*k-1)) * Decimal(1)**Decimal(n-2*k-1)
+#                 
+#        Leg_sin[idx[n, m],0] = -float(summ/Decimal(2) ** Decimal(n)*(Decimal(2*n+1)/Decimal(2)/ \
+#                               pochs(n+1-m, 2*m)) ** Decimal(0.5))
+    for n in range(1,LL+1):
+        Leg_sin[idx[n, m],0] = -0.5 * np.sqrt(n*(2.*n+1)*(n+1.)/2.)
 
     #Evaluate derivatives of normalized Associated Legendre polynomials using recurrence relation 
     Leg_deriv = np.zeros((size, NPTS), np.float64)
