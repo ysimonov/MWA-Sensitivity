@@ -13,7 +13,7 @@ def noise_waves(s11, s21):
     parameters of the LNA (DUT)
     """
     noise_par = \
-    sio.loadmat(CONST.NOISE_PARA_DIR)['noise_par'][0][0]
+    sio.loadmat(CONST.NOISE_PARA_DIR)#['noise_par'][0][0]
 
     tmin = np.array(noise_par['Tmin'][:, 0], dtype=np.float64)
     gamma_opt = np.array(noise_par['Gamma_opt'][:, 0], dtype=np.complex128)
