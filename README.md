@@ -16,6 +16,8 @@ Usage (open constants.py):
 
 3. Provide phi- and theta- angles (spherical coordinates) of sky object that's been observed on the sky semisphere;
 
+(Azimuth = Phi, Elevation = 90 - Theta)
+
 4. Give the date of observation and local coordinates of the observer.
 
 Run: 
