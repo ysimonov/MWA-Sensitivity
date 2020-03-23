@@ -16,17 +16,13 @@ Usage (open constants.py):
 
 3. Provide phi- and theta- angles (spherical coordinates) of sky object that's been observed on the sky semisphere;
 
-sin(el)=sin(ϕ)sin(θ)
+θ=arccos[cos(el)cos(az)]
 
-tan(az)=cos(ϕ)tan(θ)
+ϕ=arctan[tan(el)/sin(az)]
 
-cos(θ)=cos(el)cos(az)
+ϕ=arctan[u/v]
 
-tan(ϕ)=tan(el)/sin(az)
-
-tan(ϕ)=u/v
-
-sin(θ)=sqrt(u^2+v^2)
+θ=arcsin[sqrt(u^2+v^2)]
 
 4. Give the date of observation and local coordinates of the observer.
 
