@@ -14,4 +14,4 @@ Usage (open constants.py):
 
 3. Provide phi- and theta- angles (spherical coordinates) of sky object that's been observed on the sky semisphere;
 
-4. Give date of observation and local coordinates of the observer.
+4. Give the date of observation and local coordinates of the observer.
