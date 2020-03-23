@@ -25,6 +25,10 @@ from beam_pattern import get_beam_pattern, max_mode_size
 from interpSky import skyatlocalcoord
 from E_field import LegendreP
 
+def movingaverage(interval, window_size):
+    window= np.ones(int(window_size))/float(window_size)
+    return np.convolve(interval, window, 'same')
+
 if __name__ == "__main__":
 
     OBSERVATION_TIME = datetime.datetime(CONST.YEAR, CONST.MONTH, CONST.DAY, \
@@ -123,7 +127,7 @@ if __name__ == "__main__":
 
     pfactor = 4.0 * np.real(z_lna) / CONST.ZF
     p_lna_prime = pfactor * int_p_lna
-    area_realised = pfactor * np.square(CONST.C0 / freq_array) * ffout2 #0.5 *
+    area_realised = 0.5 * pfactor * np.square(CONST.C0 / freq_array) * ffout2 #
     ant_temp = pfactor * scaling_factor * int_t_ext
     eff_rad = np.real(p_lna_prime / tau)
     sys_temp = ant_temp + np.real(tau) * (rcv_temp  + CONST.T0 * (1.0 - eff_rad))
@@ -144,15 +148,17 @@ if __name__ == "__main__":
     end = time.time()
     print("Time elapsed = %.3f seconds" %(end-start))
 
+    sefd_averaged = movingaverage(sefd_measured, 10)
     fig1 = plt.figure()
     ax = plt.gca()
     ax.set_yscale('log')
-    ax.scatter(freq_measured, sefd_measured, label='SEFD Measured', marker='.')
+    ax.scatter(freq_measured, sefd_averaged, label='SEFD Measured', marker='.')
     ax.scatter(freq_array, sefd, label='SEFD Calculated', marker='.')
     plt.xlabel('Frequency,MHz')
     plt.ylabel('System Equivalent Flux Density, kJy')
     plt.grid()
     plt.legend()
+#    plt.show()
     fig1.savefig("SEFD_"+CONST.POL+"_POL.png")
 
     fig2, (ax1, ax2) = plt.subplots(2, 1, sharex=True)
@@ -164,6 +170,7 @@ if __name__ == "__main__":
     ax2.set_ylabel(r'$\frac{A_{array}^{r}}{\tau}$, $m^{2}$')
     ax1.grid()
     ax2.grid()
+#    plt.show()
     fig2.savefig("A_ARRAY_ETA_"+CONST.POL+"_POL.pdf")
 
     fig3, (ax1, ax2, ax3) = plt.subplots(3, 1, sharex=True)
@@ -181,4 +188,5 @@ if __name__ == "__main__":
     ax1.grid()
     ax2.grid()
     ax3.grid()
+#    plt.show()
     fig3.savefig("TEMPERATURES_"+CONST.POL+"_POL.pdf")
