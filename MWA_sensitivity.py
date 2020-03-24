@@ -133,26 +133,45 @@ if __name__ == "__main__":
     sys_temp = ant_temp + np.real(tau) * (rcv_temp  + CONST.T0 * (1.0 - eff_rad))
     sefd = CONST.KB * sys_temp / area_realised * CONST.FLUXSITOJANSKY * CONST.JYTOKJY
 
-    sefd_measured = np.ravel(sio.loadmat(CONST.SEFD_DIR)['masterfile']) * CONST.JYTOKJY
-    freq_measured = np.ravel(sio.loadmat(CONST.SEFD_DIR)['master_freq']) #MHz
-
-    threshold_min = 1e1
-    threshold_max = 1e4
-
-    for i in range(0, np.size(sefd_measured)):
-        if(sefd_measured[i] > threshold_max or sefd_measured[i] < threshold_min):
-            sefd_measured[i] = None
-
-    freq_array = freq_array * CONST.HZTOMHZ
-
     end = time.time()
     print("Time elapsed = %.3f seconds" %(end-start))
 
-    sefd_averaged = movingaverage(sefd_measured, 10)
+    #prepare plots of calculated vs measured SEFD
+    sefd_measured = sio.loadmat(CONST.SEFD_DIR)['masterfile'] #Jansky
+    freq_measured = sio.loadmat(CONST.SEFD_DIR)['master_freq'] #MHz
+
+    #clean zero points (invalid measurements)
+    mask = sefd_measured == 1
+    sefd_measured[mask] = None
+    freq_measured[mask] = None
+
+    #clean lower outliers
+    mask2 = sefd_measured > 3e7
+    sefd_measured[mask2] = None
+    freq_measured[mask2] = None
+
+    #clean upper outliers
+    mask3 = sefd_measured < 1e4
+    sefd_measured[mask3] = None
+    freq_measured[mask3] = None
+
+    #divide data into "bunches" of smaller data for averaging
+    nsamples = 896*8
+    master_freq = np.reshape(freq_measured.T, (nsamples, int(np.prod(np.size(freq_measured))/nsamples)))
+    master_sefd = np.reshape(sefd_measured.T, (nsamples, int(np.prod(np.size(sefd_measured))/nsamples)))
+
+    #average frequency and sefd scattered data
+    freq_avg = np.nanmean(master_freq, axis=1, dtype=np.float64)
+    sefd_avg = np.nanmean(master_sefd, axis=1, dtype=np.float64) * CONST.JYTOKJY
+
+    #change Hz to MHz for plotting
+    freq_array = freq_array * CONST.HZTOMHZ
+
+    #construct SEFD plot
     fig1 = plt.figure()
     ax = plt.gca()
     ax.set_yscale('log')
-    ax.scatter(freq_measured, sefd_averaged, label='SEFD Measured', marker='.')
+    ax.scatter(freq_avg, sefd_avg, label='SEFD Measured', marker='.')
     ax.scatter(freq_array, sefd, label='SEFD Calculated', marker='.')
     plt.xlabel('Frequency,MHz')
     plt.ylabel('System Equivalent Flux Density, kJy')
