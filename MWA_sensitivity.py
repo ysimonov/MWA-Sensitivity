@@ -7,6 +7,8 @@
 
 #MATLAB script is written by Daniel Chu Xin Ung (daniel.ung@curtin.edu.au)
 
+import os
+import sys
 import time #measure time of code execution
 import datetime #object that holds current date, used to specify observation time
 import math
@@ -17,17 +19,27 @@ import pandas as pd #used for reading .csv files
 import scipy.io as sio #used for reading .mat files
 import matplotlib.pyplot as plt #2D plots
 import h5py #open .h5 files
+import warnings
 
-from constants import CONST #import all constants defined in the module
+from input_data import CONST #import all constants defined in the module
 from noise_mat import noise_matrices
 from integral2D import integrate_on_sphere
 from beam_pattern import get_beam_pattern, max_mode_size
 from interpSky import skyatlocalcoord
 from E_field import LegendreP
 
+if sys.platform == 'win32':
+    # On Windows, the best timer is time.clock
+    default_timer = time.clock
+else:
+    # On most other platforms the best timer is time.time
+    default_timer = time.time
+
 def movingaverage(interval, window_size):
     window= np.ones(int(window_size))/float(window_size)
     return np.convolve(interval, window, 'same')
+
+warnings.filterwarnings("ignore")
 
 if __name__ == "__main__":
 
@@ -66,7 +78,8 @@ if __name__ == "__main__":
     int_t_ext = np.zeros((F_NUM), dtype=np.float64)
     area_realised = np.zeros((F_NUM), dtype=np.float64)
 
-    start = time.time()
+    #start timer
+    start = default_timer()
 
     freq_array = np.linspace(49920000, 327680000, 218)
 
@@ -75,8 +88,14 @@ if __name__ == "__main__":
     phi_1d = np.arange(0, N_PHI) * CONST.DEGS_PER_PIXEL * CONST.DEG2RAD
     theta_1d = np.arange(0, N_THETA) * CONST.DEGS_PER_PIXEL * CONST.DEG2RAD
 
+    print("----- extracting and interpolating sky map ------")
     sky_temp = skyatlocalcoord(CONST.FREQ_MIN, phi_1d, theta_1d, \
                                OBSERVATION_TIME, CONST.LON, CONST.LAT)
+    end1 = default_timer()
+    print("Time elapsed = %.3f seconds" %(end1-start))
+
+    print('\n')
+    print('----- calculating receiver noise parameters ------')
 
     #compute receiver's noise temperature ant parameter Tau
     mnm, msesm, mem, z_lna = noise_matrices()
@@ -99,17 +118,32 @@ if __name__ == "__main__":
 
     tau[:] = p_in[:] - p_out[:]
 
+    end2 = default_timer()
+    print("Time elapsed = %.3f seconds" %(end2-end1))
+    print('\n')
+
     # contains spherical wave expansion coefficients used in calculation of Jones matrix (E-fields)
     H5_FILE = h5py.File(CONST.H5_DIR, 'r')
 
     # find the maximum order of beam modes for computation of Legendre polynomials
     Leg_order = max_mode_size(H5_FILE)
 
+    print('----- calculating Associated Legendre polynomials -----')
     #Pre-compute Legendre polynomials
     leg_deriv, leg_sin, index, costheta, sintheta, leg_deriv1, \
     leg_sin1 = LegendreP(theta_1d, Leg_order, THETA_POINTING)
 
+    end3 = default_timer()
+    print("Time elapsed = %.3f seconds" %(end3-end2))
+    print("\n")
+
+    print('----- calculating far field patter at every frequency -----')
     #Compute far field pattern for every frequency
+
+    quarter_loop = int(F_NUM/4)
+    half_loop = int(F_NUM/2)
+    almost_there = quarter_loop*3
+
     for i in range(0, F_NUM):
 
         ffout[i, :, :] = get_beam_pattern(H5_FILE, freq_array[i], w[i, :], \
@@ -122,6 +156,17 @@ if __name__ == "__main__":
         ffout2[i] = get_beam_pattern(H5_FILE, freq_array[i], w[i, :], \
         index, leg_deriv1, leg_sin1, PHI_POINTING, THETA_POINTING, True)
 
+        if(i == quarter_loop):
+            print('25% completed ...')
+        elif(i == half_loop):
+            print('50% completed ...')
+        elif(i == almost_there):
+            print('75% completed ...')
+
+    end4 = default_timer()
+    print("Time elapsed = %.3f seconds" %(end4-end3))
+    print('\n')
+
     scaling = -2.55
     scaling_factor = np.power((freq_array / CONST.FREQ_MIN), scaling)
 
@@ -133,8 +178,8 @@ if __name__ == "__main__":
     sys_temp = ant_temp + np.real(tau) * (rcv_temp  + CONST.T0 * (1.0 - eff_rad))
     sefd = CONST.KB * sys_temp / area_realised * CONST.FLUXSITOJANSKY * CONST.JYTOKJY
 
-    end = time.time()
-    print("Time elapsed = %.3f seconds" %(end-start))
+    end = default_timer()
+    print("Total run time = %.3f seconds" %(end-start))
 
     #prepare plots of calculated vs measured SEFD
     sefd_measured = sio.loadmat(CONST.SEFD_DIR)['masterfile'] #Jansky
@@ -167,45 +212,188 @@ if __name__ == "__main__":
     #change Hz to MHz for plotting
     freq_array = freq_array * CONST.HZTOMHZ
 
-    #construct SEFD plot
-    fig1 = plt.figure()
+    #create a directory (if it does not exist)
+    path_directory = "Results/"
+
+    # define the access rights
+    access_rights = 0o755
+
+    #check if directory exists
+    if(os.path.exists(path_directory) is not True):
+        try:
+            os.mkdir(path_directory, access_rights)
+        except OSError:
+            print ("Creation of the directory %s failed" % path_directory)
+        else:
+            print ("Successfully created the directory %s " % path_directory)
+
+    #create sub-directory for results
+    path_to_results = path_directory + \
+    CONST.POL + "_POL_" + str(CONST.PHI_POINTING) + "_" + str(CONST.THETA_POINTING) + "/"
+
+    if(os.path.exists(path_to_results) is not True):
+        try:
+            os.mkdir(path_to_results, access_rights)
+        except OSError:
+            print ("Creation of the directory %s failed" % path_to_results)
+        else:
+            print ("Successfully created the directory %s " % path_to_results)
+
+    #construct plots and save them in specified directory
+    fig1 = plt.figure(dpi=1000)
     ax = plt.gca()
     ax.set_yscale('log')
-    ax.scatter(freq_avg, sefd_avg, label='SEFD Measured', marker='.')
-    ax.scatter(freq_array, sefd, label='SEFD Calculated', marker='.')
+    ax.scatter(freq_avg, sefd_avg, label='SEFD Measured', s=5)
+    #ax.scatter(freq_array, sefd, label='SEFD Calculated', s=5)
+    plt.plot(freq_array, sefd, '-', lw=2, color='r', label='SEFD Calculated')
     plt.xlabel('Frequency,MHz')
     plt.ylabel('System Equivalent Flux Density, kJy')
-    plt.grid()
+    # Don't allow the axis to be on top of your data
+    ax.set_axisbelow(True)
+
+    ax.grid(linestyle='-', linewidth='0.5', color='grey')
+
+    # Turn on the minor TICKS, which are required for the minor GRID
+    ax.minorticks_on()
+
+    # Customize the minor grid
+    ax.grid(which='minor', linestyle=':', linewidth='0.5', color='black')
+
+    # Turn off the display of all ticks.
+    ax.tick_params(which='both', # Options for both major and minor ticks
+                    top='off', # turn off top ticks
+                    left='off', # turn off left ticks
+                    right='off',  # turn off right ticks
+                    bottom='off') # turn off bottom ticks
     plt.legend()
-#    plt.show()
-    fig1.savefig("SEFD_"+CONST.POL+"_POL.png")
+    fig1.savefig(path_to_results+"SEFD.png")
 
-    fig2, (ax1, ax2) = plt.subplots(2, 1, sharex=True)
-    fig2.subplots_adjust(wspace=0, hspace=0)
-    ax1.scatter(freq_array, eff_rad * 100, marker='.')
-    ax2.scatter(freq_array, area_realised / tau, marker='.')
-    ax2.set_xlabel('Frequency, MHz')
-    ax1.set_ylabel(r'$\eta_{rad}$, %')
-    ax2.set_ylabel(r'$\frac{A_{array}^{r}}{\tau}$, $m^{2}$')
-    ax1.grid()
-    ax2.grid()
-#    plt.show()
-    fig2.savefig("A_ARRAY_ETA_"+CONST.POL+"_POL.pdf")
+    fig2 = plt.figure(dpi=1000)
+    ax = plt.gca()
+    #ax.scatter(freq_array, eff_rad * 100, marker='.', s=5)
+    plt.plot(freq_array, eff_rad * 100, '-', lw=2)
+    plt.xlabel('Frequency, MHz')
+    plt.ylabel('Radiation Efficiency, %')
+    # Don't allow the axis to be on top of your data
+    ax.set_axisbelow(True)
 
-    fig3, (ax1, ax2, ax3) = plt.subplots(3, 1, sharex=True)
-    fig3.subplots_adjust(wspace=0, hspace=0)
-    ax1.set_yscale('log')
-    ax2.set_yscale('log')
-    ax3.set_yscale('log')
-    ax1.scatter(freq_array, ant_temp / tau, marker='.')
-    ax2.scatter(freq_array, rcv_temp, marker='.')
-    ax3.scatter(freq_array, sys_temp, marker='.')
-    ax3.set_xlabel('Frequency, MHz')
-    ax1.set_ylabel(r'$T_{ant}$, K')
-    ax2.set_ylabel(r'$T_{rcv}$, K')
-    ax3.set_ylabel(r'$T_{sys}$, K')
-    ax1.grid()
-    ax2.grid()
-    ax3.grid()
-#    plt.show()
-    fig3.savefig("TEMPERATURES_"+CONST.POL+"_POL.pdf")
+    ax.grid(linestyle='-', linewidth='0.5', color='grey')
+
+    # Turn on the minor TICKS, which are required for the minor GRID
+    ax.minorticks_on()
+
+    # Customize the minor grid
+    ax.grid(which='minor', linestyle=':', linewidth='0.5', color='black')
+
+    # Turn off the display of all ticks.
+    ax.tick_params(which='both', # Options for both major and minor ticks
+                    top='off', # turn off top ticks
+                    left='off', # turn off left ticks
+                    right='off',  # turn off right ticks
+                    bottom='off') # turn off bottom ticks
+    fig2.savefig(path_to_results+"radiation_efficiency.png")
+
+    fig3 = plt.figure(dpi=1000)
+    ax = plt.gca()
+    #ax.scatter(freq_array, area_realised / tau, marker='.', s=5)
+    plt.plot(freq_array, area_realised / tau, '-', lw=2)
+    plt.xlabel('Frequency, MHz')
+    plt.ylabel('Effective Area, Square Meters')
+    # Don't allow the axis to be on top of your data
+    ax.set_axisbelow(True)
+
+    ax.grid(linestyle='-', linewidth='0.5', color='grey')
+
+    # Turn on the minor TICKS, which are required for the minor GRID
+    ax.minorticks_on()
+
+    # Customize the minor grid
+    ax.grid(which='minor', linestyle=':', linewidth='0.5', color='black')
+
+    # Turn off the display of all ticks.
+    ax.tick_params(which='both', # Options for both major and minor ticks
+                    top='off', # turn off top ticks
+                    left='off', # turn off left ticks
+                    right='off',  # turn off right ticks
+                    bottom='off') # turn off bottom ticks
+    fig3.savefig(path_to_results+"effective_area.png")
+
+    fig4 = plt.figure(dpi=1000)
+    ax = plt.gca()
+    ax.set_yscale('log')
+    #ax.scatter(freq_array, ant_temp / tau, marker='.', s=5)
+    plt.plot(freq_array, ant_temp / tau, '-', lw=2)
+    plt.xlabel('Frequency, MHz')
+    plt.ylabel('Antenna Noise Temperature, Kelvin')
+    # Don't allow the axis to be on top of your data
+    ax.set_axisbelow(True)
+
+    ax.grid(linestyle='-', linewidth='0.5', color='grey')
+
+    # Turn on the minor TICKS, which are required for the minor GRID
+    ax.minorticks_on()
+
+    # Customize the minor grid
+    ax.grid(which='minor', linestyle=':', linewidth='0.5', color='black')
+
+    # Turn off the display of all ticks.
+    ax.tick_params(which='both', # Options for both major and minor ticks
+                    top='off', # turn off top ticks
+                    left='off', # turn off left ticks
+                    right='off',  # turn off right ticks
+                    bottom='off') # turn off bottom ticks
+    fig4.savefig(path_to_results+"antenna_temperature.png")
+
+    fig5 = plt.figure(dpi=1000)
+    ax = plt.gca()
+    ax.set_yscale('log')
+    #ax.scatter(freq_array, rcv_temp, marker='.', s=5)
+    plt.plot(freq_array, rcv_temp, '-', lw=2)
+    plt.xlabel('Frequency, MHz')
+    plt.ylabel('Receiver Noise Temperature, Kelvin')
+    # Don't allow the axis to be on top of your data
+    ax.set_axisbelow(True)
+
+    ax.grid(linestyle='-', linewidth='0.5', color='grey')
+
+    # Turn on the minor TICKS, which are required for the minor GRID
+    ax.minorticks_on()
+
+    # Customize the minor grid
+    ax.grid(which='minor', linestyle=':', linewidth='0.5', color='black')
+
+    # Turn off the display of all ticks.
+    ax.tick_params(which='both', # Options for both major and minor ticks
+                    top='off', # turn off top ticks
+                    left='off', # turn off left ticks
+                    right='off',  # turn off right ticks
+                    bottom='off') # turn off bottom ticks
+    fig5.savefig(path_to_results+"receiver_temperature.png")
+
+    fig6 = plt.figure(dpi=1000)
+    ax = plt.gca()
+    ax.set_yscale('log')
+    #ax.scatter(freq_array, sys_temp, marker='.', s=5)
+    plt.plot(freq_array, sys_temp, '-', lw=2)
+    plt.xlabel('Frequency,MHz')
+    plt.ylabel('System Noise Temperature, Kelvin')
+
+    # Don't allow the axis to be on top of your data
+    ax.set_axisbelow(True)
+
+    ax.grid(linestyle='-', linewidth='0.5', color='grey')
+
+    # Turn on the minor TICKS, which are required for the minor GRID
+    ax.minorticks_on()
+
+    # Customize the minor grid
+    ax.grid(which='minor', linestyle=':', linewidth='0.5', color='black')
+
+    # Turn off the display of all ticks.
+    ax.tick_params(which='both', # Options for both major and minor ticks
+                    top='off', # turn off top ticks
+                    left='off', # turn off left ticks
+                    right='off',  # turn off right ticks
+                    bottom='off') # turn off bottom ticks
+
+    fig6.savefig(path_to_results+"system_temperature.png")

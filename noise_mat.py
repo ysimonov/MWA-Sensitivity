@@ -3,7 +3,7 @@ from numpy.linalg import inv, multi_dot
 from numpy import matmul, conj, transpose
 from skrf import Network #used for reading .snp files
 
-from constants import CONST #import all constants defined in the module
+from input_data import CONST #import all constants defined in the module
 from npar2noise_wave import noise_waves
 
 def conjt(m_arr): #conjugate transpose

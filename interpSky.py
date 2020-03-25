@@ -3,7 +3,7 @@ from datetime import date
 import numpy as np
 from scipy.interpolate import griddata #2D interpolation of meshgrid data
 from astropy.io import fits #used for reading .fits images
-from constants import CONST
+from input_data import CONST
 
 def tand(angle_deg):
     return np.tan(angle_deg * np.pi / 180)

@@ -3,7 +3,7 @@ import decimal
 from decimal import Decimal
 import numpy as np
 import h5py
-from constants import CONST
+from input_data import CONST
 decimal.getcontext().prec = CONST.LEGENDRE_DECIMAL_PRECISION #decimal point precision
 
 #AUTHOR: Yevgeniy Simonov, 2020

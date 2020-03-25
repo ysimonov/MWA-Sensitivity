@@ -1,7 +1,7 @@
 import numpy as np
 import scipy.io as sio #used for reading .mat files
 
-from constants import CONST
+from input_data import CONST
 
 def abs_sqr(a_arr):
     return np.square(np.abs(a_arr))
