@@ -130,7 +130,7 @@ if __name__ == "__main__":
 
     print('----- calculating Associated Legendre polynomials -----')
     #Pre-compute Legendre polynomials
-    leg_deriv, leg_sin, index, costheta, sintheta, leg_deriv1, \
+    leg_deriv, leg_sin, costheta, sintheta, leg_deriv1, \
     leg_sin1 = LegendreP(theta_1d, Leg_order, THETA_POINTING)
 
     end3 = default_timer()
@@ -147,14 +147,14 @@ if __name__ == "__main__":
     for i in range(0, F_NUM):
 
         ffout[i, :, :] = get_beam_pattern(H5_FILE, freq_array[i], w[i, :], \
-        index, leg_deriv, leg_sin, phi_1d, theta_1d, False)
+                         leg_deriv, leg_sin, phi_1d, theta_1d, False)
 
         int_p_lna[i] = integrate_on_sphere(phi_1d, theta_1d, sintheta, ffout[i])
 
         int_t_ext[i] = integrate_on_sphere(phi_1d, theta_1d, sintheta, ffout[i], sky_temp)
 
         ffout2[i] = get_beam_pattern(H5_FILE, freq_array[i], w[i, :], \
-        index, leg_deriv1, leg_sin1, PHI_POINTING, THETA_POINTING, True)
+                    leg_deriv1, leg_sin1, PHI_POINTING, THETA_POINTING, True)
 
         if(i == quarter_loop):
             print('25% completed ...')
@@ -172,10 +172,10 @@ if __name__ == "__main__":
 
     pfactor = 4.0 * np.real(z_lna) / CONST.ZF
     p_lna_prime = pfactor * int_p_lna
-    area_realised = 0.5 * pfactor * np.square(CONST.C0 / freq_array) * ffout2 #
+    area_realised = 0.5 * pfactor * np.square(CONST.C0 / freq_array) * ffout2 # 
     ant_temp = pfactor * scaling_factor * int_t_ext
     eff_rad = np.real(p_lna_prime / tau)
-    sys_temp = ant_temp + np.real(tau) * (rcv_temp  + CONST.T0 * (1.0 - eff_rad))
+    sys_temp = np.real(ant_temp + tau * (rcv_temp  + CONST.T0 * (1.0 - eff_rad)))
     sefd = CONST.KB * sys_temp / area_realised * CONST.FLUXSITOJANSKY * CONST.JYTOKJY
 
     end = default_timer()
@@ -244,7 +244,7 @@ if __name__ == "__main__":
     ax = plt.gca()
     ax.set_yscale('log')
     ax.scatter(freq_avg, sefd_avg, label='SEFD Measured', s=5)
-    #ax.scatter(freq_array, sefd, label='SEFD Calculated', s=5)
+    #ax.scatter(freq_measured, sefd_measured * CONST.JYTOKJY, label='SEFD Measured', s=5)
     plt.plot(freq_array, sefd, '-', lw=2, color='r', label='SEFD Calculated')
     plt.xlabel('Frequency,MHz')
     plt.ylabel('System Equivalent Flux Density, kJy')

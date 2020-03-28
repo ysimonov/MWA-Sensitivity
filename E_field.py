@@ -1,83 +1,36 @@
-import math
-import decimal
-from decimal import Decimal
 import numpy as np
 import h5py
 from input_data import CONST
-decimal.getcontext().prec = CONST.LEGENDRE_DECIMAL_PRECISION #decimal point precision
-
-#AUTHOR: Yevgeniy Simonov, 2020
-
-#computes Pochhammer's symbol z_m
-#see: https://docs.scipy.org/doc/scipy-0.17.0/reference/generated/scipy.special.poch.html
-def pochs(z, m):
-    """
-    pochs(z,m) = (z+m-1)!/(z-1)! = Gamma(z+m)/Gamma(z) for positive z,m
-    """
-    prod = Decimal(z) 
-    if m > 0:
-        j = Decimal(z)
-        while j < (z + m - 1):
-            prod *= Decimal(j + 1)
-            j += Decimal(1)
-        return prod
-    elif m == 0.: #zero
-        return Decimal(1)
-
-#factorial in Decimal Precision
-#see: https://docs.python.org/3/library/decimal.html
-def fact(k):
-    """
-    extended precision factorial function for positive arguments k>=0
-    """
-    if(k<0):
-        return None
-    elif(k==1 or k==0):
-        return Decimal(1)
-    else:
-        prod = Decimal(1)
-        j = Decimal(1)
-        while(j <= k):
-            prod = prod * Decimal(j)
-            j += Decimal(1)
-        return prod
-
-#this function returns the index of Legendre Polynomials
-def PT(l,m):
-    """
-    function that returns combined indexes of Associated Legendre polynomials
-    and their derivatives.
-    """
-    return int((m)+((l)*((l)+1))/2)
 
 #For more details regarding computation of fully normalized Associated Legendre polynomials and 
 #Spherical harmonics, refer to the article below:
 #Limpanuparb, T. and Milthorpe, J., 2014. 
 #Associated Legendre Polynomials and Spherical Harmonics Computation for Chemistry Applications. 
 #arXiv preprint arXiv:1410.1748.
-def computeP(L, idx, A, B, P, x):
+def computeP(L, A, B, x, y):
     """
     function that computes Normalised Associated Legendre polynomials
     using recurrence relations, for a single argument x = cos(theta)
     for all orders n=0..L, |m|=0..L
     ->There is no phase term (-1)^M in this implementation
     """
-    sintheta = math.sqrt(1.-x*x)
-    temp = math.sqrt(0.5)
-    P[idx[0, 0]] = 0.7071067811865475244
+
+    P = np.zeros((L + 1, L + 1), dtype=np.float64)
+
+    temp = 0.7071067811865475244008443621 #1/sqrt(2)
+    P[0, 0] = temp
     if(L>0):
-        SQRT3 = 1.7320508075688772935
-        P[idx[1, 0]] = x*SQRT3*temp
-        SQRT3DIV2 = -1.2247448713915890491
-        temp = SQRT3DIV2*sintheta*temp
-        P[idx[1, 1]]=temp
+        SQRT3 = 1.73205080756887729352744634151 #sqrt(3)
+        SQRT3DIV2 = 1.224744871391589049098642037353 #sqrt(3)/sqrt(2)
+        P[1, 0] = x*SQRT3DIV2
+        temp = -SQRT3DIV2*y*temp
+        P[1, 1]=temp
         for l in range(2, L+1):
             for m in range(0, l-1):
-                P[idx[l, m]]=A[idx[l, m]]*(x*P[idx[l-1, m]] + \
-                             B[idx[l, m]]*P[idx[l-2, m]])
-            P[idx[l, l-1]]=x*math.sqrt(2*(l-1)+3)*temp
-            temp=-math.sqrt(1.0+0.5/l)*sintheta*temp
-            P[idx[l, l]]=temp
+                P[l, m] = A[l, m] * (x * P[l-1, m] + B[l, m] * P[l-2, m])
+            P[l, l-1] = x * np.sqrt(2.0 * (l-1) + 3.0) * temp
+            temp = -np.sqrt(1.0 + 0.5 / l) * y * temp
+            P[l, l]=temp
     return P
 
 #For more information regarding P/sin term, read
@@ -92,54 +45,41 @@ def LegendreP(theta, N_max, source_theta=None):
     functions for this particular angle (source_theta)
     '''
     NPTS = len(theta)
-    safety_factor = 5
-    LL = N_max + 1 + safety_factor
+    LL = N_max + 1 
 
     x = np.cos(theta)
     y = np.sin(theta)
 
-    #Size of n,m combined 
-    size = PT(LL+1, LL+1)
-
-    #Indexes of Legendre polynomials
-    idx = np.zeros((LL+1, LL+1), np.int64)
-    for l in range(0, LL+1):
-        for m in range(0, LL+1):
-            idx[l, m] = PT(l, m) #indexes of Legendre polynomials
-
     #Temporary arrays used in recursion
-    A = np.zeros((size), dtype=np.float64) 
-    B = np.zeros((size), dtype=np.float64)
-   
-    #Legendre Polynomials
-    P = np.zeros((size), dtype=np.float64) 
+    A = np.zeros((LL + 1, LL + 1), dtype=np.float64) 
+    B = np.zeros((LL + 1, LL + 1), dtype=np.float64)
 
     #Compute temporary arrays 
     for l in range(2, LL+1):
-        ls = l*l
-        lm1s = (l-1)*(l-1)
+        ls = l**2
+        lm1s = (l-1)**2
         for m in range(0, l-1):
-            ms = m*m
-            A[idx[l, m]] = math.sqrt((4*ls-1.)/(ls-ms))
-            B[idx[l, m]] = -math.sqrt((lm1s-ms)/(4*lm1s-1.))
+            ms = m**2
+            A[l, m] = np.sqrt((4.0 * ls - 1.0) / (ls - ms))
+            B[l, m] = -np.sqrt((lm1s - ms) / (4.0 * lm1s - 1.0))
 
     #Allocate space for Legendre polynomials
-    Leg = np.zeros((size, NPTS), dtype=np.float64) # [size=(L,M),Theta]
+    LegendreP = np.zeros((LL + 1, LL + 1, NPTS), dtype=np.float64) # [size=(L,M),Theta]
 
     #Compute all Associated legendre functions on x-th grid
-    for i in range(0, len(x)):
-        Leg[:, i] = computeP(LL, idx, A, B, P, x[i])
+    for i in range(0, NPTS):
+        LegendreP[:, :, i] = computeP(LL, A, B, x[i], y[i])
 
     #Compute P/sin functions, general case:
-    Leg_sin = np.zeros((size, NPTS), np.float64)
+    LegendreS = np.zeros((LL + 1, LL + 1, NPTS), np.float64)
 
     #consider asymptotic cases when theta = 0 or theta = pi
-    eps = 1e-12
-    mask1 = (abs(theta-0.)<eps)
-    mask2 = (abs(theta-math.pi)<eps)
+    eps = 1e-14
+    mask1 = (abs(theta - 0.0) < eps)
+    mask2 = (abs(theta - np.pi) < eps)
 
     #combine masks
-    mask = np.ma.mask_or(mask1,mask2)
+    mask = np.ma.mask_or(mask1, mask2)
 
     #find location of asymptotes
     asymptote = np.where(mask)[0]
@@ -148,57 +88,63 @@ def LegendreP(theta, N_max, source_theta=None):
     regular = np.where(~mask)[0]
 
     #evaluate function at regular points
-    Leg_sin[:,regular] = Leg[:,regular] / y[regular]
+    LegendreS[:, :, regular] = LegendreP[:, :, regular] / y[regular]
 
     #Consider special case for m=1 at theta=0:
     m = 1
-    for n in range(1,LL+1):
-        Leg_sin[idx[n, m],asymptote[0]] = -0.5 * np.sqrt(n*(2.0*n+1.0)*(n+1.0)/2.0)
+    for n in range(1, LL + 1):
+        LegendreS[n, m ,asymptote[0]] = -0.5 * np.sqrt(n * (2.0 * n + 1.0) * (n + 1.0) / 2.0)
+
     if(np.shape(asymptote)==(2,)): #include theta == pi case
-        for n in range(1,LL+1):
-            Leg_sin[idx[n,m],asymptote[1]] = (-1) ** (n+1) * Leg_sin[idx[n,m],asymptote[0]]
+        for n in range(1, LL + 1):
+            LegendreS[n, m, asymptote[1]] = (-1) ** (n + 1) * LegendreS[n, m, asymptote[0]]
 
     #Evaluate derivatives of normalized Associated Legendre polynomials using recurrence relation 
-    Leg_deriv = np.zeros((size, NPTS), np.float64)
+    LegendreD = np.zeros((LL, LL, NPTS), np.float64)
+
+    #Leg_deriv = 0 when m = 0, n = 0
     for n in range(1, LL):
-        for m in range(1, n+1):
-            Leg_deriv[idx[n, m], :] = -(n+1) * x[:] * Leg_sin[idx[n, m],:] + \
-                                      np.sqrt((2*n+1)*(n+m+1)*(n-m+1)/(2*n+3)) * \
-                                      Leg_sin[idx[n+1, m],:]
+        for m in range(0, n + 1): #include the case when n = m
+            LegendreD[n, m, :] = -(n + 1.0) * x[:] * LegendreS[n, m, :] + \
+                                 np.sqrt((2.0 * n + 1.0) * (n + m + 1.0) * \
+                                 (n - m + 1.0) / (2.0 * n + 3.0)) * LegendreS[n + 1, m, :]
 
     #Compute for a single pointing if present
     if(source_theta is not None):
 
-        Leg_deriv1 = np.zeros((size), dtype=np.float64)
-        Leg_sin1 = np.zeros((size), dtype=np.float64)
+        LegendreD1 = np.zeros((LL, LL), dtype=np.float64)
+        LegendreS1 = np.zeros((LL + 1, LL + 1), dtype=np.float64)
 
         #check if source_theta is a part of existing array:
         if source_theta in theta:
 
             #find the position of theta corresponding to source_theta (assuming all values of theta are unique)
-            pos = np.where(theta == source_theta)
+            pos = np.where(abs(theta - source_theta) < eps)
 
-            Leg_deriv1[:] = Leg_deriv[:, pos].T
-            Leg_sin1[:] = Leg_sin[:, pos].T
+            LegendreD1[:, :] = np.transpose(LegendreD[:, :, pos], (2, 0, 1))
+            LegendreS1[:, :] = np.transpose(LegendreS[:, :, pos], (2, 0, 1))
 
         else: #compute legendre polynomial and sin term for this unique position
 
-            P = np.zeros((size), dtype=np.float64)
-            Leg_deriv1 = np.zeros((size), np.float64)
-            Leg_pol1 = computeP(LL, idx, A, B, P, np.cos(source_theta))
-            Leg_sin1 = Leg_pol1 / np.sin(source_theta)
-            for n in range(1, LL):
-                for m in range(1, n+1):
-                    Leg_deriv1[idx[n, m]] = -(n+1) * np.cos(source_theta) * \
-                                            Leg_sin1[idx[n, m]] + \
-                                            np.sqrt((2*n+1)*(n+m+1)*(n-m+1)/(2*n+3)) * \
-                                            Leg_sin1[idx[n+1, m]]
+            LegendreD1 = np.zeros((LL, LL), np.float64)
 
-        return Leg_deriv, Leg_sin, idx, x, y, Leg_deriv1, Leg_sin1
+            xs = np.cos(source_theta)
+            ys = np.sin(source_theta)
+
+            LegendreP1 = computeP(LL, A, B, xs, ys)
+            LegendreS1 = LegendreP1 / ys
+
+            for n in range(1, LL):
+                for m in range(0, n + 1):
+                    LegendreD1[n, m] = -(n + 1) * xs * LegendreS1[n, m] + \
+                                       np.sqrt((2.0 * n + 1.0) * (n + m + 1.0) * \
+                                       (n - m + 1.0) / (2.0 * n + 3.0)) * LegendreS1[n + 1, m]
+
+        return LegendreD, LegendreS[0 : LL + 1, 0 : LL + 1], x, y, LegendreD1, LegendreS1
 
     else:
 
-        return Leg_deriv, Leg_sin, idx, x, y
+        return LegendreD, LegendreS[0 : LL + 1, 0 : LL + 1], x, y
 
 #spherical modes used to re-construct electric fields
 def extract_modes(h5f, Vcplx, freq):
@@ -284,7 +230,7 @@ def extract_modes(h5f, Vcplx, freq):
 
     return beam_modes
 
-def construct_FF(phi, theta, idx, leg_deriv, leg_sin, beam_modes):
+def construct_FF(phi, theta, leg_deriv, leg_sin, beam_modes):
 
     """
     This routine generates E(theta,phi)(hat(theta)+hat(phi)) for all
@@ -327,11 +273,10 @@ def construct_FF(phi, theta, idx, leg_deriv, leg_sin, beam_modes):
 
     #Map functions to correct values
     for i in range(0, dim):
-        MT = Ma[i]
-        NT = N[i]
-        index = idx[NT, MT]
-        Ld[:, i] = leg_deriv[index, :]
-        Ls[:, i] = leg_sin[index, :]
+        ni = N[i]
+        mi = Ma[i]
+        Ld[:, i]  = leg_deriv[ni, mi, :]
+        Ls[:, i] = leg_sin[ni, mi, :]
 
     e_th = (Ld*Q2-M*Q1*Ls)
     e_ph = (M*Q2*Ls-Ld*Q1)*1j
@@ -343,7 +288,7 @@ def construct_FF(phi, theta, idx, leg_deriv, leg_sin, beam_modes):
 
 # ================================================================================================================
    
-def construct_FF1(phi1, theta1, idx, leg_deriv, leg_sin, beam_modes):
+def construct_FF1(phi1, theta1, leg_deriv, leg_sin, beam_modes):
 
     """
     This routine generates E(theta,phi)(hat(theta)+hat(phi)) for a
@@ -379,11 +324,10 @@ def construct_FF1(phi1, theta1, idx, leg_deriv, leg_sin, beam_modes):
    
     #Map functions to correct values
     for i in range(0, dim):
-        MT = Ma[i]
-        NT = N[i]
-        index = idx[NT, MT]
-        Ld[i] = leg_deriv[index]
-        Ls[i] = leg_sin[index]
+        ni = N[i]
+        mi = Ma[i]
+        Ld[i]  = leg_deriv[ni, mi]
+        Ls[i] = leg_sin[ni, mi]
 
     e_th = (Ld*Q2-M*Q1*Ls)
     e_ph = (M*Q2*Ls-Ld*Q1)*1j
