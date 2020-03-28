@@ -14,7 +14,6 @@ import datetime #object that holds current date, used to specify observation tim
 import math
 import numpy as np
 from numpy.linalg import multi_dot
-from datetime import date
 import pandas as pd #used for reading .csv files
 import scipy.io as sio #used for reading .mat files
 import matplotlib.pyplot as plt #2D plots
@@ -298,7 +297,7 @@ if __name__ == "__main__":
     #ax.scatter(freq_array, area_realised / tau, marker='.', s=5)
     plt.plot(freq_array, area_realised / tau, '-', lw=2)
     plt.xlabel('Frequency, MHz')
-    plt.ylabel('Effective Area, Square Meters')
+    plt.ylabel(r'Effective Area, $m^{2}$')
     # Don't allow the axis to be on top of your data
     ax.set_axisbelow(True)
 
@@ -397,3 +396,30 @@ if __name__ == "__main__":
                     bottom='off') # turn off bottom ticks
 
     fig6.savefig(path_to_results+"system_temperature.png")
+
+    fig7 = plt.figure(dpi=1000)
+    ax = plt.gca()
+    #ax.scatter(freq_array, sys_temp, marker='.', s=5)
+    plt.plot(freq_array, area_realised, '-', lw=2)
+    plt.xlabel('Frequency,MHz')
+    plt.ylabel(r'Realised Area, $m^{2}$')
+
+    # Don't allow the axis to be on top of your data
+    ax.set_axisbelow(True)
+
+    ax.grid(linestyle='-', linewidth='0.5', color='grey')
+
+    # Turn on the minor TICKS, which are required for the minor GRID
+    ax.minorticks_on()
+
+    # Customize the minor grid
+    ax.grid(which='minor', linestyle=':', linewidth='0.5', color='black')
+
+    # Turn off the display of all ticks.
+    ax.tick_params(which='both', # Options for both major and minor ticks
+                    top='off', # turn off top ticks
+                    left='off', # turn off left ticks
+                    right='off',  # turn off right ticks
+                    bottom='off') # turn off bottom ticks
+
+    fig7.savefig(path_to_results+"realised_area.png")
