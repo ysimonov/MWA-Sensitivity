@@ -49,3 +49,12 @@ OR
 Required modules:
 
 ***datetime, numpy, pandas, scipy, matplotlib, h5py, scikit-rf, astropy, aenum***
+
+Installation: 
+
+pip3 install datetime, numpy, pandas, scipy, matplotlib, h5py, scikit-rf, astropy, aenum
+
+or
+
+sudo pip3 install datetime, numpy, pandas, scipy, matplotlib, h5py, scikit-rf, astropy, aenum
+
