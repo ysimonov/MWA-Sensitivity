@@ -3,9 +3,7 @@ Calculation of MWA Sensitivity based on Daniel Ung's theory
 
 ## Cite as:
 
-## **Ung, D.C.X., 2019. *Determination of Noise Temperature and Beam Modelling of an Antenna Array with Example Application using MWA* (Doctoral dissertation, Curtin University).** 
-
-https://espace.curtin.edu.au/handle/20.500.11937/77989
+## **[Ung, D.C.X., 2019. *Determination of Noise Temperature and Beam Modelling of an Antenna Array with Example Application using MWA* (Doctoral dissertation, Curtin University).](https://espace.curtin.edu.au/handle/20.500.11937/77989)** 
 
 Simulated frequencies: 
 
@@ -50,4 +48,4 @@ OR
 
 Required modules:
 
-**datetime, numpy, pandas, scipy, matplotlib, h5py, scikit-rf, astropy**
+######***datetime, numpy, pandas, scipy, matplotlib, h5py, scikit-rf, astropy***
