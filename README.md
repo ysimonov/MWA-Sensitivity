@@ -37,4 +37,4 @@ python3 MWA_sensitivity.py
 
 Required modules:
 
-time, datetime, numpy, pandas, scipy, matplotlib, h5py, skrf, astropy.io, decimal
+time, datetime, numpy, pandas, scipy, matplotlib, h5py, scikit-rf, astropy.io
