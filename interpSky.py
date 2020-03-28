@@ -1,6 +1,6 @@
 import math
-from datetime import date
 import numpy as np
+#import matplotlib.pyplot as plt #2D plots
 from scipy.interpolate import griddata #2D interpolation of meshgrid data
 from astropy.io import fits #used for reading .fits images
 from input_data import CONST
@@ -164,4 +164,12 @@ def skyatlocalcoord(freq, phi_arr, theta_arr, observation_time, lon, lat):
     temp = griddata(kxky_sky_col, skymap_new, (kx_beam_new, ky_beam_new), 'nearest')
 
     local_sky[mask2] = temp
+
+#    contours = plt.contour(kx_beam, ky_beam, local_sky, 1000, cmap='gist_stern')
+#    plt.xlabel('kx')
+#    plt.ylabel('ky')
+#    plt.title('Sky Map at '+str(freq/1e6)+' MHz')
+#    plt.colorbar()
+#    plt.show()
+
     return local_sky
