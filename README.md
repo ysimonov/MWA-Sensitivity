@@ -21,30 +21,30 @@ Usage (open input_data.py):
 
     Conversion from Elevation and Azimuth coordinates to spherical θ and ϕ angles:
 
-      θ=arccos[cos(el)cos(az)]
+        θ=arccos[cos(el)cos(az)]
 
-      ϕ=arctan[tan(el)/sin(az)]
+        ϕ=arctan[tan(el)/sin(az)]
       
       
     Conversion from Astronomical u,v coordinates to spherical θ and ϕ angles:
     
-      θ=arcsin[sqrt(u^2+v^2)]
+        θ=arcsin[sqrt(u^2+v^2)]
 
-      ϕ=arctan[u/v]
+        ϕ=arctan[u/v]
 
 4. Give the date of observation and local coordinates of the observer.
 
 
 Run: 
 
-  OMP_THREAD_NUM=4 python3 MWA_sensitivity.py 
-  (multithreaded) 
+    OMP_THREAD_NUM=4 python3 MWA_sensitivity.py 
+    (multithreaded) 
 
 OR
 
-  python3 MWA_sensitivity.py
+    python3 MWA_sensitivity.py
   
 
 Required modules:
 
-datetime, numpy, pandas, scipy, matplotlib, h5py, scikit-rf, astropy
+    datetime, numpy, pandas, scipy, matplotlib, h5py, scikit-rf, astropy
