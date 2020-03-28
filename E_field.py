@@ -161,7 +161,7 @@ def LegendreP(theta, N_max, source_theta=None):
     #Evaluate derivatives of normalized Associated Legendre polynomials using recurrence relation 
     Leg_deriv = np.zeros((size, NPTS), np.float64)
     for n in range(1, LL):
-        for m in range(0, n):
+        for m in range(1, n+1):
             Leg_deriv[idx[n, m], :] = -(n+1) * x[:] * Leg_sin[idx[n, m],:] + \
                                       np.sqrt((2*n+1)*(n+m+1)*(n-m+1)/(2*n+3)) * \
                                       Leg_sin[idx[n+1, m],:]
@@ -187,8 +187,8 @@ def LegendreP(theta, N_max, source_theta=None):
             Leg_deriv1 = np.zeros((size), np.float64)
             Leg_pol1 = computeP(LL, idx, A, B, P, np.cos(source_theta))
             Leg_sin1 = Leg_pol1 / np.sin(source_theta)
-            for n in range(0, LL):
-                for m in range(0, n):
+            for n in range(1, LL):
+                for m in range(1, n+1):
                     Leg_deriv1[idx[n, m]] = -(n+1) * np.cos(source_theta) * \
                                             Leg_sin1[idx[n, m]] + \
                                             np.sqrt((2*n+1)*(n+m+1)*(n-m+1)/(2*n+3)) * \
