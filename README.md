@@ -6,7 +6,9 @@ Cite as:
     Ung, D.C.X., 2019. Determination of Noise Temperature and Beam Modelling 
     of an Antenna Array with Example Application using MWA (Doctoral dissertation, Curtin University).
   
+Simulated frequencies: 
 
+    \f_{sim} = [49.92,327.68] MHz with df = 1.28 MHz
 
 Extract spherical modal coefficients from archive (MWA_FEE_rev3_meas_LNA_imp.7z).
 
