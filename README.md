@@ -17,9 +17,9 @@ Usage (**input_data.py**):
 
 1. Choose polarization ('X' or 'Y');
 
-2. Specify gridpoint number from .csv file;
+2. Specify gridpoint number from .csv file (See Data foulder); 
 
-3. Provide phi- and theta- angles (spherical coordinates) of sky object that's been observed on the sky semisphere;
+3. Provide ϕ- and θ- angles (spherical coordinates) of sky object that's been observed on the sky semisphere;
 
 
     Conversion from Elevation and Azimuth coordinates to spherical θ and ϕ angles:
