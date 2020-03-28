@@ -52,9 +52,28 @@ Required modules:
 
 Installation: 
 
+Linux:
+
 pip3 install datetime, numpy, pandas, scipy, matplotlib, h5py, scikit-rf, astropy, aenum
 
-or
 
-sudo pip3 install datetime, numpy, pandas, scipy, matplotlib, h5py, scikit-rf, astropy, aenum
+Windows:
+
+Download Latest Release of Python from https://www.python.org/downloads/windows/
+
+-Open the Control Panel.
+-Click System and Security, then System
+-Click Advanced system settings on the left
+-Inside the System Properties window, click the Environment Variables button.
+-Under 'System Variables', click on PATH or path -> edit
+-Specify location of python foulder, for example, 'C:\Python' and save
+-Click edit again, and specify location of 'C:\Python\Scripts' where pip is installed, then save
+-Open Windows Power Shell and type python. The power shell should recognize this command and show the version of Python.
+-Enter 'python -m pip install –upgrade pip' command to upgrade pip
+-Type pip install datetime, numpy, pandas, scipy, matplotlib, h5py, scikit-rf, astropy, aenum
+-Open MWA_Sensitivity.py (open with), select IDLE Python
+
+Press F5 to start the script. 
+
+
 
