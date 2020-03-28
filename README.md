@@ -8,7 +8,7 @@ Cite as:
   
 Simulated frequencies: 
 
-    \f_{sim} = [49.92,327.68] MHz with df = 1.28 MHz
+    $f_{sim}$ = [49.92,327.68] MHz with df = 1.28 MHz
 
 Extract spherical modal coefficients from archive (MWA_FEE_rev3_meas_LNA_imp.7z).
 
