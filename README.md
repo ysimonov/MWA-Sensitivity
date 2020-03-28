@@ -13,7 +13,7 @@ Simulated frequencies:
 
 Extract spherical modal coefficients from archive (MWA_FEE_rev3_meas_LNA_imp.7z).
 
-Usage (input_data.py):
+Usage (**input_data.py**):
 
 1. Choose polarization ('X' or 'Y');
 
