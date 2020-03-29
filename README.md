@@ -1,5 +1,13 @@
 # MWA-Sensitivity
-Calculation of MWA Sensitivity based on Daniel Ung's theory
+The program computes:
+
+- Antenna noise temperature due to local sky image (Haslam 408 MHz all sky map) (K)
+- Effective area of 4x4 MWA array tile (m^2)
+- Radiation efficiency (%) 
+- Realised area (m^2)
+- Receiver noise temperature (K)
+- System noise temperature (K)
+- System Equivalent Flux Density (SEFD) in kJy
 
 ## Cite as:
 
