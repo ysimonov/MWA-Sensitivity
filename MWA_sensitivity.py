@@ -238,188 +238,49 @@ if __name__ == "__main__":
         else:
             print ("Successfully created the directory %s " % path_to_results)
 
-    #construct plots and save them in specified directory
-    fig1 = plt.figure(dpi=1000)
-    ax = plt.gca()
-    ax.set_yscale('log')
-    ax.scatter(freq_avg, sefd_avg, label='SEFD Measured', s=5)
-    #ax.scatter(freq_measured, sefd_measured * CONST.JYTOKJY, label='SEFD Measured', s=5)
-    plt.plot(freq_array, sefd, '-', lw=2, color='r', label='SEFD Calculated')
-    plt.xlabel('Frequency,MHz')
-    plt.ylabel('System Equivalent Flux Density, kJy')
-    # Don't allow the axis to be on top of your data
-    ax.set_axisbelow(True)
+    #create plots
+    plot_names = ['SEFD', 'radiation_efficiency', 'effective_area', \
+                  'antenna_temperature', 'receiver_temperature', \
+                  'system_temperature', 'realised_area']
 
-    ax.grid(linestyle='-', linewidth='0.5', color='grey')
+    plot_format = '.png'
 
-    # Turn on the minor TICKS, which are required for the minor GRID
-    ax.minorticks_on()
+    ylabels = ['System Equivalent Flux Density, kJy', \
+            'Radiation Efficiency, %', r'Effective Area, $m^{2}$', \
+            'Antenna Noise Temperature, K', 'Receiver Noise Temperature, K', \
+            'System Noise Temperature, K', r'Realised Area, $m^{2}$']
 
-    # Customize the minor grid
-    ax.grid(which='minor', linestyle=':', linewidth='0.5', color='black')
+    #create a dictionary for plotting
+    dict_arrays = {0 : sefd, \
+                   1 : eff_rad * 100, \
+                   2 : area_realised / tau, \
+                   3 : ant_temp / tau, \
+                   4 : rcv_temp, \
+                   5 : sys_temp, \
+                   6 : area_realised}
 
-    # Turn off the display of all ticks.
-    ax.tick_params(which='both', # Options for both major and minor ticks
-                    top='off', # turn off top ticks
-                    left='off', # turn off left ticks
-                    right='off',  # turn off right ticks
-                    bottom='off') # turn off bottom ticks
-    plt.legend()
-    fig1.savefig(path_to_results+"SEFD.png")
+    axes_scales = ['log', 'linear', 'linear', 'log', 'log', 'log', 'linear']
 
-    fig2 = plt.figure(dpi=1000)
-    ax = plt.gca()
-    #ax.scatter(freq_array, eff_rad * 100, marker='.', s=5)
-    plt.plot(freq_array, eff_rad * 100, '-', lw=2)
-    plt.xlabel('Frequency, MHz')
-    plt.ylabel('Radiation Efficiency, %')
-    # Don't allow the axis to be on top of your data
-    ax.set_axisbelow(True)
-
-    ax.grid(linestyle='-', linewidth='0.5', color='grey')
-
-    # Turn on the minor TICKS, which are required for the minor GRID
-    ax.minorticks_on()
-
-    # Customize the minor grid
-    ax.grid(which='minor', linestyle=':', linewidth='0.5', color='black')
-
-    # Turn off the display of all ticks.
-    ax.tick_params(which='both', # Options for both major and minor ticks
-                    top='off', # turn off top ticks
-                    left='off', # turn off left ticks
-                    right='off',  # turn off right ticks
-                    bottom='off') # turn off bottom ticks
-    fig2.savefig(path_to_results+"radiation_efficiency.png")
-
-    fig3 = plt.figure(dpi=1000)
-    ax = plt.gca()
-    #ax.scatter(freq_array, area_realised / tau, marker='.', s=5)
-    plt.plot(freq_array, area_realised / tau, '-', lw=2)
-    plt.xlabel('Frequency, MHz')
-    plt.ylabel(r'Effective Area, $m^{2}$')
-    # Don't allow the axis to be on top of your data
-    ax.set_axisbelow(True)
-
-    ax.grid(linestyle='-', linewidth='0.5', color='grey')
-
-    # Turn on the minor TICKS, which are required for the minor GRID
-    ax.minorticks_on()
-
-    # Customize the minor grid
-    ax.grid(which='minor', linestyle=':', linewidth='0.5', color='black')
-
-    # Turn off the display of all ticks.
-    ax.tick_params(which='both', # Options for both major and minor ticks
-                    top='off', # turn off top ticks
-                    left='off', # turn off left ticks
-                    right='off',  # turn off right ticks
-                    bottom='off') # turn off bottom ticks
-    fig3.savefig(path_to_results+"effective_area.png")
-
-    fig4 = plt.figure(dpi=1000)
-    ax = plt.gca()
-    ax.set_yscale('log')
-    #ax.scatter(freq_array, ant_temp / tau, marker='.', s=5)
-    plt.plot(freq_array, ant_temp / tau, '-', lw=2)
-    plt.xlabel('Frequency, MHz')
-    plt.ylabel('Antenna Noise Temperature, Kelvin')
-    # Don't allow the axis to be on top of your data
-    ax.set_axisbelow(True)
-
-    ax.grid(linestyle='-', linewidth='0.5', color='grey')
-
-    # Turn on the minor TICKS, which are required for the minor GRID
-    ax.minorticks_on()
-
-    # Customize the minor grid
-    ax.grid(which='minor', linestyle=':', linewidth='0.5', color='black')
-
-    # Turn off the display of all ticks.
-    ax.tick_params(which='both', # Options for both major and minor ticks
-                    top='off', # turn off top ticks
-                    left='off', # turn off left ticks
-                    right='off',  # turn off right ticks
-                    bottom='off') # turn off bottom ticks
-    fig4.savefig(path_to_results+"antenna_temperature.png")
-
-    fig5 = plt.figure(dpi=1000)
-    ax = plt.gca()
-    ax.set_yscale('log')
-    #ax.scatter(freq_array, rcv_temp, marker='.', s=5)
-    plt.plot(freq_array, rcv_temp, '-', lw=2)
-    plt.xlabel('Frequency, MHz')
-    plt.ylabel('Receiver Noise Temperature, Kelvin')
-    # Don't allow the axis to be on top of your data
-    ax.set_axisbelow(True)
-
-    ax.grid(linestyle='-', linewidth='0.5', color='grey')
-
-    # Turn on the minor TICKS, which are required for the minor GRID
-    ax.minorticks_on()
-
-    # Customize the minor grid
-    ax.grid(which='minor', linestyle=':', linewidth='0.5', color='black')
-
-    # Turn off the display of all ticks.
-    ax.tick_params(which='both', # Options for both major and minor ticks
-                    top='off', # turn off top ticks
-                    left='off', # turn off left ticks
-                    right='off',  # turn off right ticks
-                    bottom='off') # turn off bottom ticks
-    fig5.savefig(path_to_results+"receiver_temperature.png")
-
-    fig6 = plt.figure(dpi=1000)
-    ax = plt.gca()
-    ax.set_yscale('log')
-    #ax.scatter(freq_array, sys_temp, marker='.', s=5)
-    plt.plot(freq_array, sys_temp, '-', lw=2)
-    plt.xlabel('Frequency,MHz')
-    plt.ylabel('System Noise Temperature, Kelvin')
-
-    # Don't allow the axis to be on top of your data
-    ax.set_axisbelow(True)
-
-    ax.grid(linestyle='-', linewidth='0.5', color='grey')
-
-    # Turn on the minor TICKS, which are required for the minor GRID
-    ax.minorticks_on()
-
-    # Customize the minor grid
-    ax.grid(which='minor', linestyle=':', linewidth='0.5', color='black')
-
-    # Turn off the display of all ticks.
-    ax.tick_params(which='both', # Options for both major and minor ticks
-                    top='off', # turn off top ticks
-                    left='off', # turn off left ticks
-                    right='off',  # turn off right ticks
-                    bottom='off') # turn off bottom ticks
-
-    fig6.savefig(path_to_results+"system_temperature.png")
-
-    fig7 = plt.figure(dpi=1000)
-    ax = plt.gca()
-    #ax.scatter(freq_array, sys_temp, marker='.', s=5)
-    plt.plot(freq_array, area_realised, '-', lw=2)
-    plt.xlabel('Frequency,MHz')
-    plt.ylabel(r'Realised Area, $m^{2}$')
-
-    # Don't allow the axis to be on top of your data
-    ax.set_axisbelow(True)
-
-    ax.grid(linestyle='-', linewidth='0.5', color='grey')
-
-    # Turn on the minor TICKS, which are required for the minor GRID
-    ax.minorticks_on()
-
-    # Customize the minor grid
-    ax.grid(which='minor', linestyle=':', linewidth='0.5', color='black')
-
-    # Turn off the display of all ticks.
-    ax.tick_params(which='both', # Options for both major and minor ticks
-                    top='off', # turn off top ticks
-                    left='off', # turn off left ticks
-                    right='off',  # turn off right ticks
-                    bottom='off') # turn off bottom ticks
-
-    fig7.savefig(path_to_results+"realised_area.png")
+    for i in range(0, 7):
+        fig = plt.figure(dpi=1000)
+        ax = plt.gca()
+        if(i != 0):
+            plt.plot(freq_array, dict_arrays[i], '-', lw=2)
+        else:
+            ax.scatter(freq_avg, sefd_avg, marker = "x", label=\
+            r'SEFD Measured at $\phi = 151.46^{o}, \theta = 18.3^{o}$', s=5)
+            plt.plot(freq_array, dict_arrays[i], '-', \
+                     lw=2, color='r', label='SEFD Calculated')
+            ax.legend()
+        plt.xlabel('Frequency, MHz')
+        plt.ylabel(ylabels[i])
+        ax.set_axisbelow(True)
+        ax.set_yscale(axes_scales[i])
+        ax.minorticks_on()
+        ax.grid(which='minor', linestyle=':', linewidth='0.5', color='black')
+        ax.tick_params(which='both', # Options for both major and minor ticks
+                       top='off', # turn off top ticks
+                       left='off', # turn off left ticks
+                       right='off',  # turn off right ticks
+                       bottom='off') # turn off bottom ticks
+        fig.savefig(path_to_results + plot_names[i] + plot_format)
