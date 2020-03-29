@@ -1,4 +1,10 @@
 # MWA-Sensitivity
+
+## Cite as:
+
+## **[Ung, D.C.X., 2019. *Determination of Noise Temperature and Beam Modelling of an Antenna Array with Example Application using MWA* (Doctoral dissertation, Curtin University).](https://espace.curtin.edu.au/handle/20.500.11937/77989)** 
+
+
 The program computes:
 
 - Antenna noise temperature due to local sky image (Haslam 408 MHz all sky map) (K)
@@ -8,10 +14,6 @@ The program computes:
 - Receiver noise temperature (K)
 - System noise temperature (K)
 - System Equivalent Flux Density (SEFD) in kJy
-
-## Cite as:
-
-## **[Ung, D.C.X., 2019. *Determination of Noise Temperature and Beam Modelling of an Antenna Array with Example Application using MWA* (Doctoral dissertation, Curtin University).](https://espace.curtin.edu.au/handle/20.500.11937/77989)** 
 
 Simulated frequencies: 
 
