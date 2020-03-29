@@ -14,6 +14,7 @@ The program computes:
 - Receiver noise temperature (K)
 - System noise temperature (K)
 - System Equivalent Flux Density (SEFD) in kJy
+- Sensitivity (m^2.K^-1)
 
 Simulated frequencies: 
 
