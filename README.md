@@ -20,7 +20,7 @@ Simulated frequencies:
 
     f = [49.92,327.68] MHz with df = 1.28 MHz
 
-Extract spherical modal coefficients from archive (MWA_FEE_rev3_meas_LNA_imp.7z).
+Extract spherical modal coefficients from archive (MWA_FEE_rev3_meas_LNA_imp.7z) in the same folder (Data/).
 
 Usage (**input_data.py**):
 
