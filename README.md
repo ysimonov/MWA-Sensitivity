@@ -68,6 +68,9 @@ Linux:
 pip3 install datetime, numpy, pandas, scipy, matplotlib, h5py, scikit-rf, astropy, aenum
 
 
+If you have Anaconda installed, in the Spyder, you will need to type: 'pip install scikit-rf, aenum' in the console
+
+
 Windows:
 
 Download Latest Release of Python from https://www.python.org/downloads/windows/
