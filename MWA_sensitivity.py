@@ -136,7 +136,7 @@ if __name__ == "__main__":
     print("Time elapsed = %.3f seconds" %(end3-end2))
     print("\n")
 
-    print('----- calculating far field patter at every frequency -----')
+    print('----- calculating far field pattern and integrating at every frequency -----')
     #Compute far field pattern for every frequency
 
     quarter_loop = int(F_NUM/4)
@@ -175,7 +175,8 @@ if __name__ == "__main__":
     ant_temp = pfactor * scaling_factor * int_t_ext
     eff_rad = np.real(p_lna_prime / tau)
     sys_temp = np.real(ant_temp + tau * (rcv_temp  + CONST.T0 * (1.0 - eff_rad)))
-    sefd = CONST.KB * sys_temp / area_realised * CONST.FLUXSITOJANSKY * CONST.JYTOKJY
+    sensitivity = area_realised / sys_temp
+    sefd = (CONST.KB * CONST.FLUXSITOJANSKY * CONST.JYTOKJY) / sensitivity
 
     end = default_timer()
     print("Total run time = %.3f seconds" %(end-start))
@@ -241,14 +242,15 @@ if __name__ == "__main__":
     #create plots
     plot_names = ['SEFD', 'radiation_efficiency', 'effective_area', \
                   'antenna_temperature', 'receiver_temperature', \
-                  'system_temperature', 'realised_area']
+                  'system_temperature', 'realised_area', 'sensitivity']
 
     plot_format = '.png'
 
     ylabels = ['System Equivalent Flux Density, kJy', \
             'Radiation Efficiency, %', r'Effective Area, $m^{2}$', \
             'Antenna Noise Temperature, K', 'Receiver Noise Temperature, K', \
-            'System Noise Temperature, K', r'Realised Area, $m^{2}$']
+            'System Noise Temperature, K', r'Realised Area, $m^{2}$', \
+             r'Sensitivity, $\frac{m^{2}}{K}$']
 
     #create a dictionary for plotting
     dict_arrays = {0 : sefd, \
@@ -257,11 +259,13 @@ if __name__ == "__main__":
                    3 : ant_temp / tau, \
                    4 : rcv_temp, \
                    5 : sys_temp, \
-                   6 : area_realised}
+                   6 : area_realised, \
+                   7 : sensitivity}
 
-    axes_scales = ['log', 'linear', 'linear', 'log', 'log', 'log', 'linear']
+    axes_scales = ['log', 'linear', 'linear', 'log', \
+                   'log', 'log', 'linear', 'log']
 
-    for i in range(0, 7):
+    for i in range(0, 8):
         fig = plt.figure(dpi=1000)
         ax = plt.gca()
         if(i != 0):
