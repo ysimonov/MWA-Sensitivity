@@ -73,21 +73,16 @@ If you have Anaconda installed, in the Spyder, you will need to install only sci
 
 Windows:
 
-Download Latest Release of Python from https://www.python.org/downloads/windows/
+- Download Anaconda for Windows (Select Latest Version): https://www.anaconda.com/distribution/#download-section
+- Open Anaconda Navigator
+- Open Spyder
+- In the Console Line type: pip instal aenum, scikit-rf
+- Download Zip folder and extract archive
+- Go to /Data/ folder and extract MWA_FEE_rev3_meas_LNA_imp.h5 file
+- Open MWA_Sensitivity.py in Spyder or type, for example, "cd C:\Users\Desktop\MWA-Sensitivity-master" in the Console Line
+- Enter 'run MWA_sensitivity' in the Console Line to run the main script
+- Alternatively, skip the above two options, and use key combination Ctrl+O, navigate to the folder where MWA_Sensitivity.py is located and press F5 to run the script
 
-- Open the Control Panel.
-- Click System and Security, then System
-- Click Advanced system settings on the left
-- Inside the System Properties window, click the Environment Variables button.
-- Under 'System Variables', click on PATH or path -> edit
-- Specify location of python foulder, for example, 'C:\Python' and save
-- Click edit again, and specify location of 'C:\Python\Scripts' where pip is installed, then save
-- Open Windows Power Shell and type python. The power shell should recognize this command and show the version of Python.
-- Enter 'python -m pip install –upgrade pip' command to upgrade pip
-- Type pip install datetime, numpy, pandas, scipy, matplotlib, h5py, scikit-rf, astropy, aenum
-- Open MWA_Sensitivity.py (open with), select IDLE Python
-
-Press F5 to start the script. 
 
 
 
