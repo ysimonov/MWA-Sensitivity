@@ -73,7 +73,7 @@ Windows / Linux / MacOS:
 - Open Anaconda Navigator
 - Open Spyder
 - In the Console Line type: pip instal aenum, scikit-rf
-- Download Zip folder and extract archive
+- Download archive (Windows) or clone this repository
 - Go to /Data/ folder and extract MWA_FEE_rev3_meas_LNA_imp.h5 file
 - Open MWA_Sensitivity.py in Spyder or type, for example, "cd C:\Users\Desktop\MWA-Sensitivity-master" in the Console Line
 - Enter 'run MWA_sensitivity' in the Console Line to run the main script
