@@ -88,15 +88,14 @@ if __name__ == "__main__":
     theta_1d = np.arange(0, N_THETA) * CONST.DEGS_PER_PIXEL * CONST.DEG2RAD
 
     print("----- extracting and interpolating sky map ------")
-    sky_temp = skyatlocalcoord(CONST.FREQ_MIN, phi_1d, theta_1d, \
-                               OBSERVATION_TIME, CONST.LON, CONST.LAT)
+    sky_temp = skyatlocalcoord(phi_1d, theta_1d, OBSERVATION_TIME)
     end1 = default_timer()
     print("Time elapsed = %.3f seconds" %(end1-start))
 
     print('\n')
     print('----- calculating receiver noise parameters ------')
 
-    #compute receiver's noise temperature ant parameter Tau
+    #compute receiver's noise temperature and parameter Tau
     mnm, msesm, mem, z_lna = noise_matrices()
 
     w_amp = 1.0 / math.sqrt(N_ANT)
@@ -229,7 +228,8 @@ if __name__ == "__main__":
 
     #create sub-directory for results
     path_to_results = path_directory + \
-    CONST.POL + "_POL_" + str(CONST.PHI_POINTING) + "_" + str(CONST.THETA_POINTING) + "/"
+    CONST.POL + "_POL_" + str(CONST.PHI_POINTING) + "_" + \
+    str(CONST.THETA_POINTING) + "_GP_"+ str(CONST.GRIDPOINT) + "/"
 
     if(os.path.exists(path_to_results) is not True):
         try:
@@ -271,8 +271,11 @@ if __name__ == "__main__":
         if(i != 0):
             plt.plot(freq_array, dict_arrays[i], '-', lw=2)
         else:
-            ax.scatter(freq_avg, sefd_avg, marker = "x", label=\
-            r'SEFD Measured at $\phi = 151.46^{o}, \theta = 18.3^{o}$', s=5)
+            if(CONST.GRIDPOINT == 19 and \
+               CONST.PHI_POINTING == 151.46 and \
+               CONST.THETA_POINTING == 18.3):
+                ax.scatter(freq_avg, sefd_avg, marker = "x", label=\
+                           r'SEFD Measured at $\phi = 151.46^{o}, \theta = 18.3^{o}$', s=5)
             plt.plot(freq_array, dict_arrays[i], '-', \
                      lw=2, color='r', label='SEFD Calculated')
             ax.legend()

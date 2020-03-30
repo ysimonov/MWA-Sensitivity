@@ -7,11 +7,22 @@ def abs_sqr(a_arr):
     return np.square(np.abs(a_arr))
 
 def noise_waves(s11, s21):
-    """
-    computes correlated noise waves based on measured noise parameters Tmin,N,Gamma_opt
-    input arrays: s11 and s21 have dimensions (0:F_NUM) are scattering 
-    parameters of the LNA (DUT)
-    """
+    '''
+
+    Parameters
+    ----------
+    s11, s21 : complex128
+        differential scattering parameters of LNA.
+
+    Returns
+    -------
+    n_hat : complex128
+        matrix of noise wave correlation coefficients normalised to kT0.
+        c11 - correlated noise wave from the input of LNA
+        c22 - correlated noise wave from the output of LNA
+        c12 - cross-correlated noise waves
+
+    '''
     noise_par = \
     sio.loadmat(CONST.NOISE_PARA_DIR)#['noise_par'][0][0]
 

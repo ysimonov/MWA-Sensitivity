@@ -1,5 +1,4 @@
 import numpy as np
-import h5py
 from input_data import CONST
 
 #For more details regarding computation of fully normalized Associated Legendre polynomials and 
@@ -8,19 +7,33 @@ from input_data import CONST
 #Associated Legendre Polynomials and Spherical Harmonics Computation for Chemistry Applications. 
 #arXiv preprint arXiv:1410.1748.
 def computeP(L, A, B, x, y):
-    """
-    function that computes Normalised Associated Legendre polynomials
-    using recurrence relations, for a single argument x = cos(theta)
-    for all orders n=0..L, |m|=0..L
-    ->There is no phase term (-1)^M in this implementation
-    """
+    '''
 
+    Parameters
+    ----------
+    L : integer
+        highest order of associated legendre polynomials.
+    A : float64 (array)
+        used in recurrence relations of legendre polynomials.
+    B : float64 (array)
+        used in recurrence relations of legendre polynomials.
+    x : float64 (scalar)
+        cosine of theta angle.
+    y : float64 (scalar)
+        sin of theta angle.
+
+    Returns
+    -------
+    P : normalized associated polynomials of size [L + 1, L + 1]
+        the values of normalized associated legendre of 
+        degree lmax = L and order |mmax| = L for a particular angle theta.
+
+    '''
     P = np.zeros((L + 1, L + 1), dtype=np.float64)
 
     temp = 0.7071067811865475244008443621 #1/sqrt(2)
     P[0, 0] = temp
     if(L>0):
-        SQRT3 = 1.73205080756887729352744634151 #sqrt(3)
         SQRT3DIV2 = 1.224744871391589049098642037353 #sqrt(3)/sqrt(2)
         P[1, 0] = x*SQRT3DIV2
         temp = -SQRT3DIV2*y*temp
@@ -39,10 +52,36 @@ def computeP(L, A, B, x, y):
 #Progress In Electromagnetics Research, 123, pp.243-261.
 def LegendreP(theta, N_max, source_theta=None):
     '''
-    This routine generates derivatives of normalised Associated Legendre polynomials
-    and Legendre / sin(theta) for evaluation of multipole expansion of electric fields
-    source_theta is an optional parameter that permits evaluation of Associated Legendre
-    functions for this particular angle (source_theta)
+
+    Parameters
+    ----------
+    theta : float64 (array)
+        array of theta angles (radians) in spherical coordinate system.
+    N_max : integer
+        maximum order of associated legendre polynomials and derivatives.
+    source_theta : float64, optional
+        a single theta angle (radian) for which associated
+        legendre polynomials should be computed. the default is none.
+
+    Returns
+    -------
+    LegendreD[0 : N_max + 2, 0 : N_max + 2, 0 : len(theta) + 1] : float64 (array)
+        derivatives of normalized associated legendre polynomials for
+        all degrees and orders up to N_max (including) computed for all angles of theta.
+    LegendreS[0 : N_max + 2, 0 : N_max + 2, 0 : len(theta) + 1] : float64 (array) 
+        legendre / sin(theta) term for all degrees and orders up to
+        N_max (including) computed for all angles of theta.
+    x[0 : len(theta) + 1] : float64 (array)
+        cos(theta) computed for all angles of theta.
+    y[0 : len(theta) + 1] : float64 (array)
+        sin(theta) computed for all angles of theta.
+    LegendreD1[0 : N_max + 2, 0 : N_max + 2] : float64 (array)
+        derivatives of normalized associated legendre polynomials for all
+        degrees and orders up to N_max (including) computed for a particular angle source_theta.
+    LegendreS1[0 : N_max + 2, 0 : N_max + 2] : float64 (array)
+        legendre / sin(theta) term for all degrees and orders 
+        up to N_max (including) computed for a particular angle source_theta.
+
     '''
     NPTS = len(theta)
     LL = N_max + 1 
@@ -121,8 +160,8 @@ def LegendreP(theta, N_max, source_theta=None):
             #find the position of theta corresponding to source_theta (assuming all values of theta are unique)
             pos = np.where(abs(theta - source_theta) < eps)
 
-            LegendreD1[:, :] = np.transpose(LegendreD[:, :, pos], (2, 0, 1))
-            LegendreS1[:, :] = np.transpose(LegendreS[:, :, pos], (2, 0, 1))
+            LegendreD1[:, :] = np.squeeze(LegendreD[:, :, pos])
+            LegendreS1[:, :] = np.squeeze(LegendreS[:, :, pos])
 
         else: #compute legendre polynomial and sin term for this unique position
 
@@ -148,17 +187,28 @@ def LegendreP(theta, N_max, source_theta=None):
 
 #spherical modes used to re-construct electric fields
 def extract_modes(h5f, Vcplx, freq):
+    '''
 
-    """
-    h5f - .h5 file containing shperical modes
-    Vcplx - complex beamformer coefficients
-    freq - single frequency point
-    Aim: extracts modal coefficients from h5 file and
-    sums them up, scaling by beamformer coefficients.
-    They are used to reconstruct electric fields from FEKO simulation
-    N,M are arrays containing all combinations of indexes required to reconstruct
-    spherical vector harmonics
-    """
+    Parameters
+    ----------
+    h5f : dictionary of float and integer arrays
+        file containing spherical modal coefficients and indexes of spherical
+        vector harmonics for a particular polarisation and frequency
+    Vcplx : complex128 (array)
+        array of complex beamformer coefficients corresponding to a particular
+        grid point specified in the input_data.py.
+    freq : float64 (singe number)
+        a single frequency point given in Hz.
+
+    Returns
+    -------
+    beam_modes : dictionary of complex128 and integer arrays
+        contains accumulated spherical modal coefficients scaled by
+        the values of complex beamformer coefficients.
+    N, M - integer arrays
+        combination of indexes required for reconstruction of spherical vector
+        harmonics
+    '''
 
     beam_modes = {}
     N_ANT = CONST.N_ANT
@@ -231,17 +281,33 @@ def extract_modes(h5f, Vcplx, freq):
     return beam_modes
 
 def construct_FF(phi, theta, leg_deriv, leg_sin, beam_modes):
+    '''
 
-    """
-    This routine generates E(theta,phi)(hat(theta)+hat(phi)) for all
-    angles theta and phi (arrays)
-    idx - index to Associated Legendre values of n,m
-    beam_modes - spherical modal coefficients
-    leg_deriv - d(P(cos(theta)))/d(theta) [Normalised]
-    leg_sin - P(cos(theta))/sin(theta) [Normalised]
-    """
+    Parameters
+    ----------
+    phi : float64 (array)
+        array of phi angles in spherical coordinate system.
+    theta : float64 (array)
+        array of theta angles in spherical coordinate system.
+    leg_deriv : float64 (array)
+        derivatives of normalised associated legendre polynomials.
+    leg_sin : float64 (array)
+        normalised associated legendre divided by sin(theta).
+    beam_modes : dictionary of complex128 and integer arrays
+        dictionary containing spherical modal coefficients scaled by
+        complex beamformer weights and indexes of spherical harmonics.
 
-    Phi_max = np.size(phi)
+    Returns
+    -------
+    E_Theta : float64 (array)
+        array of electric fields as a function of phi and theta in theta hat 
+        direction.
+    E_Phi : float64 (array)
+        array of electric fields as a function of phi and theta in phi hat 
+        direction.
+
+    '''
+
     Theta_max = np.size(theta)
 
     target = beam_modes
@@ -252,7 +318,6 @@ def construct_FF(phi, theta, leg_deriv, leg_sin, beam_modes):
     M = target['M'].astype(np.int64)
     N = target['N'].astype(np.int64)
 
-    Factor = np.zeros((Phi_max, dim), dtype=np.complex128)
     Ld = np.zeros((Theta_max, dim), dtype=np.float64) #Associated Legendre Polynomials
     Ls = np.zeros((Theta_max, dim), dtype=np.float64) #Associated Legendre over sin term
 
@@ -289,15 +354,32 @@ def construct_FF(phi, theta, leg_deriv, leg_sin, beam_modes):
 # ================================================================================================================
    
 def construct_FF1(phi1, theta1, leg_deriv, leg_sin, beam_modes):
+    '''
 
-    """
-    This routine generates E(theta,phi)(hat(theta)+hat(phi)) for a
-    single pointing on the sky (phi1, theta1).
-    idx - index to Associated Legendre values of n,m
-    beam_modes - spherical modal coefficients
-    leg_deriv - d(P(cos(theta)))/d(theta) [Normalised]
-    leg_sin - P(cos(theta))/sin(theta) [Normalised]
-    """
+    Parameters
+    ----------
+    phi1 : float64
+        a single phi pointing angle in spherical coordinate system.
+    theta1 : float64
+        a single theta pointing angle in spherical coordinate system.
+    leg_deriv : float64 (array)
+        derivatives of normalised associated legendre polynomials.
+    leg_sin : float64 (array)
+        normalised associated legendre divided by sin(theta).
+    beam_modes : dictionary of complex128 and integer arrays
+        dictionary containing spherical modal coefficients scaled by
+        complex beamformer weights and indexes of spherical harmonics.
+
+    Returns
+    -------
+    E_Theta : float64
+        value of the electric field corresponding 
+        to (phi1, theta1) in theta hat direction.
+    E_Phi : float64
+        value of the electric field corresponding 
+        to (phi1, theta1) in phi hat direction.
+
+    '''
 
     target = beam_modes
 

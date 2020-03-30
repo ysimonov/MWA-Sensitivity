@@ -6,21 +6,60 @@ from astropy.io import fits #used for reading .fits images
 from input_data import CONST
 
 def tand(angle_deg):
-    return np.tan(angle_deg * np.pi / 180)
+    return np.tan(angle_deg * CONST.DEG2RAD)
 
 def sind(angle_deg):
-    return np.sin(angle_deg * np.pi / 180)
+    return np.sin(angle_deg * CONST.DEG2RAD)
 
 def cosd(angle_deg):
-    return np.cos(angle_deg * np.pi / 180)
+    return np.cos(angle_deg * CONST.DEG2RAD)
 
-def wrapto360(lon):
-    return lon % 360
+def wrapto360(angle_deg):
+    '''
 
-def wrapto180(lon):
-    return np.arctan2(sind(lon), cosd(lon)) * 180 / np.pi #between -180 and 180
+    Parameters
+    ----------
+    angle_deg : float64 (array / scalar)
+        angle(s) in degrees.
+
+    Returns
+    -------
+    angle_deg : float64 (array / scalar)
+        wrapped angle(s) in degrees satisfying 0 <= angle_deg <= 360.
+
+    '''
+    return angle_deg % 360
+
+def wrapto180(angle_deg):
+    '''
+
+    Parameters
+    ----------
+    angle_deg : float64 (array / scalar)
+        angle in degrees.
+
+    Returns
+    -------
+    float64 (array / scalar)
+        wrapped angle(s) in degrees satisfying -180 <= angle_deg <= 180.
+
+    '''
+    return np.arctan2(sind(angle_deg), cosd(angle_deg)) * CONST.RAD2DEG
 
 def julian_datetime(date):
+    '''
+
+    Parameters
+    ----------
+    date : datetime
+        the date and time of observation.
+
+    Returns
+    -------
+    julian_date : float
+        returns julian calculated datetime.
+
+    '''
     julian_date = math.floor(365.25 * (date.year + 4716.0)) + \
                   math.floor(30.6001 * (date.month + 1.0)) + 2.0 - \
                   math.floor(date.year / 100.0) + \
@@ -29,12 +68,28 @@ def julian_datetime(date):
                   date.second / 3600.0) / 24.0
     return julian_date
 
-def skyatlocalcoord(freq, phi_arr, theta_arr, observation_time, lon, lat):
+def skyatlocalcoord(phi_arr, theta_arr, observation_time):
+    '''
 
-    """
-    This function creates the interpolated skymap for a signle lon, lat 
-    and observation time. 
-    """
+    Parameters
+    ----------
+    phi_arr : float64 (array)
+        the array of phi angles (radians).
+    theta_arr : float64 (array)
+        the array of theta angles (radians).
+    observation_time : datetime
+        the date and time of observation.
+
+    Returns
+    -------
+    local_sky : float64 (array), dimension: (size(phi_arr), size(theta_arr))
+        returns interpolated temperatures of the entire visible southern sky.
+
+    '''
+
+    freq = CONST.FREQ_MIN
+    lon = CONST.LON
+    lat = CONST.LAT
 
     #get time of observation
     hour = observation_time.hour

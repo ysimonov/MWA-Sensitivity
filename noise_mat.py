@@ -13,6 +13,20 @@ def mat_prod(a_mat,b_mat):
     return matmul(a_mat,b_mat)
 
 def noise_matrices():
+    '''
+
+    Returns
+    -------
+    mnm : complex128 (array)
+        outbound noise correlation matrix due to internal noise.
+    msesm : complex128 (array)
+        outbound noise correlation matrix due to external noise.
+    mem : complex128 (array)
+        inbound noise correlation matrix due to external noise.
+    z_load : complex128 (array)
+        load impedance (impedance of identical LNAs).
+
+    '''
 
     #Specify data foulders
     sds_dut = Network(CONST.SDS_DUT_DIR).s

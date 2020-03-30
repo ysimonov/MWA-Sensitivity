@@ -4,16 +4,14 @@ class CONST(Constant):
 
     #===============VARIABLE DECLARATION===============#
 
-    POL = 'Y' #SPECIFY POLARISATION HERE
+    POL = 'X' #SPECIFY POLARISATION HERE
 
     DEGS_PER_PIXEL = 0.5 #deg/pix - number of degrees per pixel (used to construct angular grid). The lower the number,
                         #          the more dense anglular grid is which may or may not improve accuracy of integration
     GRIDPOINT = 19 #selected MWA gridpoint (0 to 196) (see .csv file)
 
-    PHI_POINTING = 151.46 #measured 'phi' angle on sky semisphere
-    THETA_POINTING = 18.3 #measured 'theta' angle on sky semisphere
-
-    LEGENDRE_DECIMAL_PRECISION = 60
+    PHI_POINTING = 153.4349 #151.46 #measured 'phi' angle on sky semisphere
+    THETA_POINTING = 15.3729 #18.3 #measured 'theta' angle on sky semisphere
 
     #===============DATE OF OBSERVATION=================#
 
