@@ -69,7 +69,7 @@ pip3 install datetime, numpy, pandas, scipy, matplotlib, h5py, scikit-rf, astrop
 
 Windows / Linux / MacOS:
 
-- Download Anaconda for Windows (Select Latest Version): https://www.anaconda.com/distribution/#download-section
+- Download Anaconda (Select Latest Version): https://www.anaconda.com/distribution/#download-section
 - Open Anaconda Navigator
 - Open Spyder
 - In the Console Line type: pip instal aenum, scikit-rf
