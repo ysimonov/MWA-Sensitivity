@@ -1,11 +1,11 @@
 #Author: Yevgeniy Simonov (simonov.yevgeniy@gmail.com)
 #Date: March 2020
+#Partially translated from original MATLAB script
+#MATLAB script is written by Daniel Chu Xin Ung (daniel.ung@curtin.edu.au)
 
 #Ref: Ung, D.C.X., 2019. Determination of Noise Temperature and Beam Modelling
 #                        of an Antenna Array with Example Application using MWA
 #                        (Doctoral dissertation, Curtin University).
-
-#MATLAB script is written by Daniel Chu Xin Ung (daniel.ung@curtin.edu.au)
 
 import os
 import sys
